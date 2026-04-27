@@ -1,0 +1,63 @@
+version: '3.9'
+
+# Urban Safety Intelligence Dashboard — Docker Compose
+# Architecture: Frontend (Nginx+React) → Backend (Node.js) → MongoDB
+#
+# Run: docker-compose up --build
+# Seed: docker-compose exec backend node seed.js
+
+services:
+
+  # ── MongoDB Database ──────────────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: crime-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - crime-net
+
+  # ── Node.js / Express Backend ─────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crime-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/crimedb
+      - PORT=5000
+    depends_on:
+      - mongo
+    networks:
+      - crime-net
+
+  # ── React Frontend (Nginx) ────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:5000
+    container_name: crime-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - crime-net
+
+# ── Persistent Volume ────────────────────────────────────────
+volumes:
+  mongo-data:
+
+# ── Shared Network ───────────────────────────────────────────
+networks:
+  crime-net:
+    driver: bridge

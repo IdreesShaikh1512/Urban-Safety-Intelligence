@@ -1,0 +1,9 @@
+# Backend node_modules
+node_modules/
+
+# Environment files
+.env
+.env.docker
+
+# Logs
+*.log

@@ -1,0 +1,13 @@
+services:
+  # ── Backend API (Node.js + Express) ──────────────────────────
+  - type: web
+    name: urban-safety-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false   # Set manually in Render dashboard → Environment tab
+      - key: NODE_ENV
+        value: production
